@@ -8,13 +8,12 @@ public class TE {
         this.count = count;
     }
 
-
     public TE() {
         this.prob = new Probability(0);
         this.count = 1;
     }
 
-    public void addProb(Probability prob) {
+    public void setProb(Probability prob) {
         this.prob = prob;
     }
 
