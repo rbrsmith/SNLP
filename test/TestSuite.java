@@ -4,7 +4,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-        DataTest.class,
+        LanguageModelTest.class,
         NGramTest.class,
         ProbabilityTest.class,
         TETest.class

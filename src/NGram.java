@@ -15,4 +15,9 @@ public class NGram extends ArrayList<String> {
         super(ngram);
     }
 
+    public NGram() {
+        super();
+    }
+
+
 }
