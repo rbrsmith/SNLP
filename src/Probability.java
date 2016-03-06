@@ -3,9 +3,10 @@ import java.text.DecimalFormat;
 /**
  * Simple class that holds probabilities
  */
-public class Probability {
+public class Probability implements Comparable {
 
     private double prob;
+    final private int nbDecimals = 50;
 
     /**
      * Default constructor
@@ -26,7 +27,7 @@ public class Probability {
 
     public String toString() {
         DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(8);
+        df.setMaximumFractionDigits(nbDecimals);
         return df.format(prob) + "%";
     }
 
@@ -59,4 +60,12 @@ public class Probability {
     }
 
 
+
+    @Override
+    public int compareTo(Object o) {
+        Probability other = (Probability) o;
+        Double mine = new Double(prob);
+        Double theirs = new Double(other.prob);
+        return mine.compareTo(theirs);
+    }
 }

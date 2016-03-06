@@ -12,6 +12,19 @@ public class LanguageModel {
     private int size;
     // For values that have not been encountered
     private final TE empty = new TE(new Probability(0), 0);
+    private String name;
+
+
+    public LanguageModel(int size, String name) {
+        this.name = name;
+        consturct(size);
+    }
+
+
+    public LanguageModel(int size) {
+        consturct(size);
+    }
+
 
     /**
      * Build the map
@@ -19,13 +32,18 @@ public class LanguageModel {
      * Otherwise build the model as a hashmap that represents another model
      * @param size
      */
-    public LanguageModel(int size) {
+    public void consturct(int size) {
         this.size = size;
         if(size == 1) {
             data = new HashMap<String, TE>();
         } else {
             data = new HashMap<String, LanguageModel>();
         }
+
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
@@ -101,6 +119,12 @@ public class LanguageModel {
         return get(ws);
     }
 
+    public TE get(NGram words) throws InconsistentNgramSizeException {
+        ArrayList<String> ws = new ArrayList<>(words);
+        return get(ws);
+
+    }
+
     /**
      *
      * @param words ArrayList of words of TE we want to get
@@ -167,4 +191,6 @@ public class LanguageModel {
             }
         }
     }
+
+
 }
