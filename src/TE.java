@@ -1,9 +1,9 @@
 public class TE {
 
     private Probability prob;
-    private int count;
+    private double count;
 
-    public TE(Probability prob, int count) {
+    public TE(Probability prob, double count) {
         this.prob = prob;
         this.count = count;
     }
@@ -25,7 +25,7 @@ public class TE {
         this.count += 1;
     }
 
-    public int getCount() {
+    public double getCount() {
         return this.count;
     }
 

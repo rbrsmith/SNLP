@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
 
+//TODO better delta smoothing handling (especially get)
+// TODO why does 4-gram return null with smoothing
+
 public class CharacterModel {
 
     int size;
@@ -22,12 +25,12 @@ public class CharacterModel {
         this.size = size;
         this.trainingFile = trainingFile;
         this.testingFile = testingFile;
-        BasqueLM = new LanguageModel(size, "Basque");
-        CatalanLM = new LanguageModel(size, "Catalan");
-        GalicianLM = new LanguageModel(size, "Galician");
-        SpanishLM = new LanguageModel(size, "Spanish");
-        EnglishLM = new LanguageModel(size, "English");
-        PortugeseLM = new LanguageModel(size, "Protugese");
+        BasqueLM = new LanguageModel(size, "Basque", "eu");
+        CatalanLM = new LanguageModel(size, "Catalan", "ca");
+        GalicianLM = new LanguageModel(size, "Galician", "gl");
+        SpanishLM = new LanguageModel(size, "Spanish", "es");
+        EnglishLM = new LanguageModel(size, "English", "en");
+        PortugeseLM = new LanguageModel(size, "Protugese", "pt");
 
     }
 
@@ -67,6 +70,14 @@ public class CharacterModel {
             }
         }
         br.close();
+
+        double delta = 0.5;
+        BasqueLM.refreshProbabilities(delta);
+        CatalanLM.refreshProbabilities(delta);
+        GalicianLM.refreshProbabilities(delta);
+        SpanishLM.refreshProbabilities(delta);
+        EnglishLM.refreshProbabilities(delta);
+        PortugeseLM.refreshProbabilities(delta);
     }
 
 
@@ -79,12 +90,49 @@ public class CharacterModel {
             }
             lm.add(tmp);
         }
-        lm.refreshProbabilities();
     }
 
     public void test()  throws Exception {
-        String test = "romeo did a big fat poo in the kitchen.";
-        Probability winner = new Probability(0);
+
+
+        FileInputStream fstream = new FileInputStream(testingFile);
+        BufferedReader br = new BufferedReader(new InputStreamReader(fstream, "UTF-8"));
+
+        String strLine;
+        int tried   = 0;
+        int total   = 0;
+        int correct = 0;
+        while ((strLine = br.readLine()) != null) {
+            // Print the content on the console
+            String[] tabs = strLine.split("\t");
+            if (tabs.length < 3) {
+                continue;
+            }
+            String text = "";
+            for (int i = 3; i < tabs.length; i++) {
+                text += tabs[i];
+            }
+            String language = tabs[2];
+            String probLanguage = getLanguage(text);
+            total += 1;
+            if(probLanguage != null) {
+                tried += 1;
+                if(probLanguage.equals(language)) {
+                    correct += 1;
+                }
+            }
+        }
+        Double triedD = new Double(tried);
+        Double totalD = new Double(total);
+        Double correctD = new Double(correct);
+
+        System.out.printf("%s%f%s\n", "Recall: ", correctD / totalD * 100, "%");
+        System.out.printf("%s%f%s\n", "Precision: ", correctD / triedD * 100, "%");
+
+
+    }
+
+    private String getLanguage(String text) throws Exception {Probability winner = new Probability(0);
         int winI = -1;
 
         Probability prob;
@@ -100,25 +148,30 @@ public class CharacterModel {
 
 
         for(int i=0;i<6;i++){
-            prob = getProbability(test, lms[i]);
-            System.out.println(prob);
+            prob = getProbability(text, lms[i]);
+        //    System.out.println(prob);
             if(prob.compareTo(winner) > 0) {
                 winner = prob;
                 winI = i;
             }
         }
-        System.out.println("Winner is " + lms[winI].getName() + " at " + winner);
+        if(winI == -1) {
+            return null;
+        } else {
+            return lms[winI].getLang();
+        }
     }
 
     private Probability getProbability(String text, LanguageModel lm) throws Exception {
         NGram tmp;
         Probability total = null;
+        double delta = 0.5;
         for(int i=0; i<=text.length() - size; i++) {
             tmp = new NGram();
             for(int j = 0; j<size;j++) {
                 tmp.add(text.charAt(i + j) + "");
             }
-            Probability res = lm.get(tmp).getProb();
+            Probability res = lm.get(tmp,delta).getProb();
 
             if(total == null) {
                 total = res;

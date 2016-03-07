@@ -13,10 +13,12 @@ public class LanguageModel {
     // For values that have not been encountered
     private final TE empty = new TE(new Probability(0), 0);
     private String name;
+    private String language;
 
 
-    public LanguageModel(int size, String name) {
+    public LanguageModel(int size, String name, String lang) {
         this.name = name;
+        this.language = lang;
         consturct(size);
     }
 
@@ -40,6 +42,10 @@ public class LanguageModel {
             data = new HashMap<String, LanguageModel>();
         }
 
+    }
+
+    public String getLang() {
+        return language;
     }
 
     public String getName() {
@@ -114,14 +120,25 @@ public class LanguageModel {
      * @return TE holding count and probability
      * @throws InconsistentNgramSizeException thrown if number of words doesn't match current model size
      */
+    public TE get(String words, double delta) throws InconsistentNgramSizeException {
+        ArrayList<String> ws = new ArrayList<>(Arrays.asList(words.split(" ")));
+        return get(ws, delta);
+    }
+
     public TE get(String words) throws InconsistentNgramSizeException {
         ArrayList<String> ws = new ArrayList<>(Arrays.asList(words.split(" ")));
-        return get(ws);
+        return get(ws, 0);
+    }
+
+    public TE get(NGram words, double delta) throws InconsistentNgramSizeException {
+        ArrayList<String> ws = new ArrayList<>(words);
+        return get(ws, delta);
+
     }
 
     public TE get(NGram words) throws InconsistentNgramSizeException {
         ArrayList<String> ws = new ArrayList<>(words);
-        return get(ws);
+        return get(ws, 0);
 
     }
 
@@ -131,7 +148,7 @@ public class LanguageModel {
      * @return TE holding count and probability
      * @throws InconsistentNgramSizeException thrown if number of words doesn't match current model size
      */
-    private TE get(ArrayList<String> words) throws InconsistentNgramSizeException{
+    private TE get(ArrayList<String> words, double delta) throws InconsistentNgramSizeException{
         ArrayList<String> ws = new ArrayList<>(words);
 
         if(ws.size() != size) {
@@ -143,7 +160,7 @@ public class LanguageModel {
         if(size == 1) {
             if(data.get(key) == null) {
                 // Return 0 count, 0 probability
-                return empty;
+                return new TE(new Probability(delta/getVocabulary()), delta);
             } else {
                 return (TE) data.get(key);
             }
@@ -155,10 +172,10 @@ public class LanguageModel {
             LanguageModel d = (LanguageModel) data.get(key);
             if(d == null) {
                 // Return 0 count, 0 probability
-                return empty;
+                return new TE(new Probability(delta/getVocabulary()), delta);
             }
 
-            return d.get(ws);
+            return d.get(ws, delta);
         }
     }
 
@@ -166,20 +183,24 @@ public class LanguageModel {
      * Re-Calculate all the probabilities in the TE classes at the edge of the table
      * Called when counts have been updated
      */
-    public void refreshProbabilities() {
+    public void refreshProbabilities(double delta) {
         if(size == 1) {
             // Unigram
-            int totalCount = 0;
+            double totalCount = 0;
             // Get total count
             for(Object obj : data.values()){
                 TE entry = (TE) obj;
                 totalCount += entry.getCount();
             }
+            //TODO cache getVocabulary
+            double vocab = getVocabulary();
+            totalCount += delta*vocab;
+
 
             // Calculate probabilities
             for(Object obj : data.values()){
                 TE entry = (TE) obj;
-                entry.setProb(entry.getCount() / (double) totalCount * 100);
+                entry.setProb((entry.getCount() + delta) / totalCount * 100);
             }
         } else {
             // Recursively update probabilities for each
@@ -187,10 +208,20 @@ public class LanguageModel {
             for(Object obj : data.values()) {
                 LanguageModel d = (LanguageModel) obj;
                 if(d == null) continue;
-                d.refreshProbabilities();
+                d.refreshProbabilities(delta);
             }
         }
     }
 
+    public void refreshProbabilities() {
+        refreshProbabilities(0);
+    }
 
+    public double getVocabulary() {
+        double count = 0;
+        for(Object obj: data.values()) {
+            count += 1;
+        }
+        return count;
+    }
 }
