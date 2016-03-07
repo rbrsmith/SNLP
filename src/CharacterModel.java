@@ -1,37 +1,32 @@
 import java.io.*;
 
-//TODO better delta smoothing handling (especially get)
-// TODO why does 4-gram return null with smoothing
-
 public class CharacterModel {
 
-    int size;
-    LanguageModel BasqueLM;
-    LanguageModel CatalanLM;
-    LanguageModel GalicianLM;
-    LanguageModel SpanishLM;
-    LanguageModel EnglishLM;
-    LanguageModel PortugeseLM;
-    File trainingFile;
-    File testingFile;
-    private final double DELTA = 0.5;
+    private int size;
+    private LanguageModel BasqueLM;
+    private LanguageModel CatalanLM;
+    private LanguageModel GalicianLM;
+    private LanguageModel SpanishLM;
+    private LanguageModel EnglishLM;
+    private LanguageModel PortugeseLM;
+    private File trainingFile;
+    private File testingFile;
+    private double delta;
 
-    public CharacterModel(int size, File trainingFile, File testingFile) {
+    public CharacterModel(File trainingFile, File testingFile, int size, Double delta) {
         this.size = size;
         this.trainingFile = trainingFile;
         this.testingFile = testingFile;
+        this.delta = delta;
         BasqueLM = new LanguageModel(size, "Basque", "eu");
         CatalanLM = new LanguageModel(size, "Catalan", "ca");
         GalicianLM = new LanguageModel(size, "Galician", "gl");
         SpanishLM = new LanguageModel(size, "Spanish", "es");
         EnglishLM = new LanguageModel(size, "English", "en");
         PortugeseLM = new LanguageModel(size, "Protugese", "pt");
-
     }
 
     public void train() throws Exception {
-        //TODO strip out /n's
-
 
         FileInputStream fstream = new FileInputStream(trainingFile);
         BufferedReader br = new BufferedReader(new InputStreamReader(fstream, "UTF-8"));
@@ -66,12 +61,12 @@ public class CharacterModel {
         }
         br.close();
 
-        BasqueLM.refreshProbabilities(DELTA);
-        CatalanLM.refreshProbabilities(DELTA);
-        GalicianLM.refreshProbabilities(DELTA);
-        SpanishLM.refreshProbabilities(DELTA);
-        EnglishLM.refreshProbabilities(DELTA);
-        PortugeseLM.refreshProbabilities(DELTA);
+        BasqueLM.refreshProbabilities(delta);
+        CatalanLM.refreshProbabilities(delta);
+        GalicianLM.refreshProbabilities(delta);
+        SpanishLM.refreshProbabilities(delta);
+        EnglishLM.refreshProbabilities(delta);
+        PortugeseLM.refreshProbabilities(delta);
     }
 
 
@@ -105,6 +100,10 @@ public class CharacterModel {
             String text = "";
             for (int i = 3; i < tabs.length; i++) {
                 text += tabs[i];
+            }
+            if(text.length() < size) {
+                // Too small
+                continue;
             }
             String language = tabs[2];
             String probLanguage = getLanguage(text);
@@ -162,9 +161,9 @@ public class CharacterModel {
         for(int i=0; i<=text.length() - size; i++) {
             tmp = new NGram();
             for(int j = 0; j<size;j++) {
-                tmp.add(text.charAt(i + j) + "");
+                tmp.add((text.charAt(i + j) + ""));
             }
-            Probability res = lm.get(tmp, DELTA).getProb();
+            Probability res = lm.get(tmp, delta).getProb();
 
             if(total == null) {
                 total = res;
