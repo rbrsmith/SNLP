@@ -1,10 +1,4 @@
-import com.sun.xml.internal.ws.server.provider.ProviderArgumentsBuilder;
-
 import java.io.*;
-import java.nio.file.ProviderNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Queue;
 
 //TODO better delta smoothing handling (especially get)
 // TODO why does 4-gram return null with smoothing
@@ -20,6 +14,7 @@ public class CharacterModel {
     LanguageModel PortugeseLM;
     File trainingFile;
     File testingFile;
+    private final double DELTA = 0.5;
 
     public CharacterModel(int size, File trainingFile, File testingFile) {
         this.size = size;
@@ -71,13 +66,12 @@ public class CharacterModel {
         }
         br.close();
 
-        double delta = 0.5;
-        BasqueLM.refreshProbabilities(delta);
-        CatalanLM.refreshProbabilities(delta);
-        GalicianLM.refreshProbabilities(delta);
-        SpanishLM.refreshProbabilities(delta);
-        EnglishLM.refreshProbabilities(delta);
-        PortugeseLM.refreshProbabilities(delta);
+        BasqueLM.refreshProbabilities(DELTA);
+        CatalanLM.refreshProbabilities(DELTA);
+        GalicianLM.refreshProbabilities(DELTA);
+        SpanishLM.refreshProbabilities(DELTA);
+        EnglishLM.refreshProbabilities(DELTA);
+        PortugeseLM.refreshProbabilities(DELTA);
     }
 
 
@@ -86,7 +80,7 @@ public class CharacterModel {
         for(int i=0; i<=line.length() - size; i++) {
             tmp = new NGram();
             for(int j = 0; j<size;j++) {
-                tmp.add(line.charAt(i + j) + "");
+                tmp.add((line.charAt(i + j) + ""));
             }
             lm.add(tmp);
         }
@@ -165,13 +159,12 @@ public class CharacterModel {
     private Probability getProbability(String text, LanguageModel lm) throws Exception {
         NGram tmp;
         Probability total = null;
-        double delta = 0.5;
         for(int i=0; i<=text.length() - size; i++) {
             tmp = new NGram();
             for(int j = 0; j<size;j++) {
                 tmp.add(text.charAt(i + j) + "");
             }
-            Probability res = lm.get(tmp,delta).getProb();
+            Probability res = lm.get(tmp, DELTA).getProb();
 
             if(total == null) {
                 total = res;
