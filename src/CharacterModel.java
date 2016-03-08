@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CharacterModel {
 
@@ -73,7 +75,8 @@ public class CharacterModel {
         EnglishLM.refreshProbabilities(delta);
         PortugeseLM.refreshProbabilities(delta);
 
-        BasqueLM.save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\");
+        save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\", BasqueLM);
+        save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\", EnglishLM);
 
     }
 
@@ -210,6 +213,45 @@ public class CharacterModel {
 
 
         return total;
+    }
+
+    public void save(String s, LanguageModel lm) throws Exception {
+
+        String path = s + lm.getName() + "-" + size + "gramLM.txt";
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+        int i = 0;
+        lm.refreshProbabilities(0);
+        HashMap<String, String> output = new HashMap<>();
+        for(String key: lm.getKeys()) {
+            HashMap<String, TE> grams = lm.getAt(key);
+            for(Map.Entry<String, TE> gram: grams.entrySet()){
+                output.put(gram.getKey(), gram.getValue().getProb().toString());
+            //    System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
+            //    writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
+                i += 1;
+            }
+        }
+        lm.refreshProbabilities(delta);
+        for(String key: lm.getKeys()) {
+            HashMap<String, TE> grams = lm.getAt(key);
+            for(Map.Entry<String, TE> gram: grams.entrySet()) {
+                String tmp = output.get(gram.getKey());
+                output.put(gram.getKey(), tmp + "\t" + gram.getValue().getProb().toString());
+                //    System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
+                //    writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
+                i += 1;
+            }
+        }
+
+        for(Map.Entry<String, String> str: output.entrySet()) {
+            System.out.println(str.getKey() + "\t" + str.getValue());
+            writer.println(str.getKey() + "\t" + str.getValue());
+        }
+
+
+        writer.close();
+
+
     }
 }
 

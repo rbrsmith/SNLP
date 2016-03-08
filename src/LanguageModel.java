@@ -227,27 +227,9 @@ public class LanguageModel {
         return count;
     }
 
-    public void save(String s) throws Exception {
-        String path = s + name + "-" + size + "gramLM.txt";
-        PrintWriter writer = new PrintWriter(path, "UTF-8");
-        int i = 0;
-        for(Object obj: data.keySet()) {
-            String key = (String) obj;
-            HashMap<String, TE> grams = getAt(key);
-            for(Map.Entry<String, TE> gram: grams.entrySet()){
-                if ( i >= 50) break;
-                System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
-                writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
-                i += 1;
-            }
-        }
-
-        writer.close();
 
 
-    }
-
-    private HashMap<String, TE> getAt(String key) {
+    public HashMap<String, TE> getAt(String key) {
         if(size == 1) {
             return new HashMap<String, TE>() {{ put(key, (TE) data.get(key)); }};
         } else {
@@ -264,5 +246,10 @@ public class LanguageModel {
             }
             return res;
         }
+    }
+
+    public ArrayList<String> getKeys() {
+        ArrayList<String> tmp = new ArrayList<>(data.keySet());
+        return tmp;
     }
 }
