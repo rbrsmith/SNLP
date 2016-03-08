@@ -236,11 +236,10 @@ public class LanguageModel {
             HashMap<String, TE> grams = getAt(key);
             for(Map.Entry<String, TE> gram: grams.entrySet()){
                 if ( i >= 50) break;
+                System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
                 writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
                 i += 1;
             }
-
-
         }
 
         writer.close();

@@ -42,6 +42,11 @@ public class CharacterModel {
             for(int i=3;i<tabs.length;i++) {
                 text += tabs[i];
             }
+
+
+
+
+
             String language = tabs[2];
             if(language.equals("eu")) {
                 addToLM(BasqueLM, text);
@@ -68,19 +73,47 @@ public class CharacterModel {
         EnglishLM.refreshProbabilities(delta);
         PortugeseLM.refreshProbabilities(delta);
 
-        BasqueLM.save("/home/ross/Dropbox/IdeaProjects/SMLP/");
+        BasqueLM.save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\");
 
     }
 
 
+//    public void addToLM(LanguageModel lm, String line) throws Exception {
+//        NGram tmp;
+//        for(int i=0; i<=line.length() - size; i++) {
+//            tmp = new NGram();
+//            for(int j = 0; j<size;j++) {
+//                tmp.add((line.charAt(i + j) + ""));
+//            }
+//            lm.add(tmp);
+//        }
+//    }
+
     public void addToLM(LanguageModel lm, String line) throws Exception {
         NGram tmp;
-        for(int i=0; i<=line.length() - size; i++) {
+        for(int i = 0; i<line.length();) {
             tmp = new NGram();
-            for(int j = 0; j<size;j++) {
-                tmp.add((line.charAt(i + j) + ""));
+            int k = 0;
+            boolean eof = false;
+            for(int j=0; j<size;) {
+                if((i+k) > line.length() -1) {
+                    eof = true;
+                    break;
+                }
+                int codePoint = line.codePointAt(i + k);
+                int[] arr = new int[] {codePoint};
+                tmp.add(new String(arr, 0, 1));
+                k += Character.charCount(codePoint);
+                j += 1;
             }
+            if(eof) break;
             lm.add(tmp);
+
+            int codePoint = line.codePointAt(i + 0);
+            i += Character.charCount(codePoint);
+//            if(!Character.isValidCodePoint(codePoint)) {
+//                System.out.println(Character.isValidCodePoint(codePoint));
+//            }
         }
     }
 

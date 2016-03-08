@@ -43,8 +43,8 @@ public class Main {
         CharacterModel model = new CharacterModel(training, testing, modelSize,  delta);
 
 //        // Train and then test the model on the two tweet files
-//        model.train();
- //       model.test();
+        model.train();
+        model.test();
 
 
         PrintWriter writer = new PrintWriter("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\test.txt", "UTF-8");
@@ -61,21 +61,26 @@ public class Main {
 
         };
         String s = new String(bytes, "UTF-8");
+        String s1 = "\uD83D\uDE01";
+        String s2 = "Já vemos Mariana \uD83D\uDE02";
+
+
 
         writer.print("\uD83D\uDE01");
         writer.println();
         writer.print(s);
         writer.close();
-        System.out.println(s);
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i<s.length();) {
-            int codePoint = s.codePointAt(i);
-            System.out.println(codePoint);
+        for(int i = 0; i<s1.length();) {
+            int codePoint = s1.codePointAt(i);
+            char[] c = Character.toChars(codePoint);
             sb.appendCodePoint(codePoint);
-            System.out.println(Character.isValidCodePoint(codePoint));
+            int[] arr = new int[] { codePoint };
+            String s3 = new String(arr,0,1);
+
+
             i += Character.charCount(codePoint);
         }
-        System.out.println(sb);
 
     }
 
