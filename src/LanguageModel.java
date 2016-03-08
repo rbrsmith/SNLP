@@ -1,6 +1,8 @@
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Hashmap that holds the words and their counts and probabilities
@@ -223,5 +225,45 @@ public class LanguageModel {
             count += 1;
         }
         return count;
+    }
+
+    public void save(String s) throws Exception {
+        String path = s + name + "-" + size + "gramLM.txt";
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+        int i = 0;
+        for(Object obj: data.keySet()) {
+            String key = (String) obj;
+            HashMap<String, TE> grams = getAt(key);
+            for(Map.Entry<String, TE> gram: grams.entrySet()){
+                if ( i >= 50) break;
+                writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
+                i += 1;
+            }
+
+
+        }
+
+        writer.close();
+
+
+    }
+
+    private HashMap<String, TE> getAt(String key) {
+        if(size == 1) {
+            return new HashMap<String, TE>() {{ put(key, (TE) data.get(key)); }};
+        } else {
+            HashMap<String, TE> res = new HashMap<>();
+            LanguageModel d = (LanguageModel) data.get(key);
+            for(Object obj : d.data.keySet()) {
+                String k = (String) obj;
+                HashMap<String, TE> inner = d.getAt(k);
+                for(Map.Entry<String, TE> entry : inner.entrySet()) {
+                    String entryK = entry.getKey();
+                    TE val = entry.getValue();
+                    res.put(key + " " + entryK, val);
+                }
+            }
+            return res;
+        }
     }
 }

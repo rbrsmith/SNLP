@@ -67,6 +67,9 @@ public class CharacterModel {
         SpanishLM.refreshProbabilities(delta);
         EnglishLM.refreshProbabilities(delta);
         PortugeseLM.refreshProbabilities(delta);
+
+        BasqueLM.save("/home/ross/Dropbox/IdeaProjects/SMLP/");
+
     }
 
 

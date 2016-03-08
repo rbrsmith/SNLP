@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.PrintWriter;
 
 public class Main {
 
@@ -41,9 +42,14 @@ public class Main {
         // Initiate model
         CharacterModel model = new CharacterModel(training, testing, modelSize,  delta);
 
-        // Train and then test the model on the two tweet files
+//        // Train and then test the model on the two tweet files
         model.train();
         model.test();
+
+
+        PrintWriter writer = new PrintWriter("/home/ross/Dropbox/IdeaProjects/SMLP/test.txt", "UTF-8");
+        writer.print("\uD83D\uDE01");
+        writer.close();
     }
 
 
