@@ -1,5 +1,5 @@
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.charset.Charset;
 
 public class Main {
 
@@ -50,6 +50,12 @@ public class Main {
         PrintWriter writer = new PrintWriter("/home/ross/Dropbox/IdeaProjects/SMLP/test.txt", "UTF-8");
         writer.print("\uD83D\uDE01");
         writer.close();
+
+        InputStream inputStream = new FileInputStream("/home/ross/Dropbox/IdeaProjects/SMLP/test.txt");
+        Reader reader      = new InputStreamReader(inputStream,
+                Charset.forName("UTF-8"));
+
+
     }
 
 
