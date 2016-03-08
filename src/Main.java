@@ -47,14 +47,40 @@ public class Main {
         model.test();
 
 
-        PrintWriter writer = new PrintWriter("/home/ross/Dropbox/IdeaProjects/SMLP/test.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\test.txt", "UTF-8");
+
+
+        byte[] bytes = {
+                0x48, 0x69, 0x2c,                       // ASCII chars are 1 byte each
+                (byte) 0xe6, (byte) 0x82, (byte) 0xa8,  // U+60A8
+
+                (byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x81,
+
+                (byte) 0xe5, (byte) 0xa5, (byte) 0xbd,  // U+597D
+                0x21
+
+        };
+        String s = new String(bytes, "UTF-8");
+        String s1 = "\uD83D\uDE01";
+        String s2 = "Já vemos Mariana \uD83D\uDE02";
+
+
+
         writer.print("\uD83D\uDE01");
+        writer.println();
+        writer.print(s);
         writer.close();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i<s1.length();) {
+            int codePoint = s1.codePointAt(i);
+            char[] c = Character.toChars(codePoint);
+            sb.appendCodePoint(codePoint);
+            int[] arr = new int[] { codePoint };
+            String s3 = new String(arr,0,1);
 
-        InputStream inputStream = new FileInputStream("/home/ross/Dropbox/IdeaProjects/SMLP/test.txt");
-        Reader reader      = new InputStreamReader(inputStream,
-                Charset.forName("UTF-8"));
 
+            i += Character.charCount(codePoint);
+        }
 
     }
 

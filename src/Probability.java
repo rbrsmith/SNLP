@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
 public class Probability implements Comparable {
 
     private double prob;
-    final private int nbDecimals = 150;
+    final private int nbDecimals = 2;
 
     /**
      * Default constructor

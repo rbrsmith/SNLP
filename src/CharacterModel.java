@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CharacterModel {
 
@@ -42,6 +44,11 @@ public class CharacterModel {
             for(int i=3;i<tabs.length;i++) {
                 text += tabs[i];
             }
+
+
+
+
+
             String language = tabs[2];
             if(language.equals("eu")) {
                 addToLM(BasqueLM, text);
@@ -68,19 +75,48 @@ public class CharacterModel {
         EnglishLM.refreshProbabilities(delta);
         PortugeseLM.refreshProbabilities(delta);
 
-        BasqueLM.save("/home/ross/Dropbox/IdeaProjects/SMLP/");
+        save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\", BasqueLM);
+        save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\", EnglishLM);
 
     }
 
 
+//    public void addToLM(LanguageModel lm, String line) throws Exception {
+//        NGram tmp;
+//        for(int i=0; i<=line.length() - size; i++) {
+//            tmp = new NGram();
+//            for(int j = 0; j<size;j++) {
+//                tmp.add((line.charAt(i + j) + ""));
+//            }
+//            lm.add(tmp);
+//        }
+//    }
+
     public void addToLM(LanguageModel lm, String line) throws Exception {
         NGram tmp;
-        for(int i=0; i<=line.length() - size; i++) {
+        for(int i = 0; i<line.length();) {
             tmp = new NGram();
-            for(int j = 0; j<size;j++) {
-                tmp.add((line.charAt(i + j) + ""));
+            int k = 0;
+            boolean eof = false;
+            for(int j=0; j<size;) {
+                if((i+k) > line.length() -1) {
+                    eof = true;
+                    break;
+                }
+                int codePoint = line.codePointAt(i + k);
+                int[] arr = new int[] {codePoint};
+                tmp.add(new String(arr, 0, 1));
+                k += Character.charCount(codePoint);
+                j += 1;
             }
+            if(eof) break;
             lm.add(tmp);
+
+            int codePoint = line.codePointAt(i + 0);
+            i += Character.charCount(codePoint);
+//            if(!Character.isValidCodePoint(codePoint)) {
+//                System.out.println(Character.isValidCodePoint(codePoint));
+//            }
         }
     }
 
@@ -177,6 +213,45 @@ public class CharacterModel {
 
 
         return total;
+    }
+
+    public void save(String s, LanguageModel lm) throws Exception {
+
+        String path = s + lm.getName() + "-" + size + "gramLM.txt";
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+        int i = 0;
+        lm.refreshProbabilities(0);
+        HashMap<String, String> output = new HashMap<>();
+        for(String key: lm.getKeys()) {
+            HashMap<String, TE> grams = lm.getAt(key);
+            for(Map.Entry<String, TE> gram: grams.entrySet()){
+                output.put(gram.getKey(), gram.getValue().getProb().toString());
+            //    System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
+            //    writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
+                i += 1;
+            }
+        }
+        lm.refreshProbabilities(delta);
+        for(String key: lm.getKeys()) {
+            HashMap<String, TE> grams = lm.getAt(key);
+            for(Map.Entry<String, TE> gram: grams.entrySet()) {
+                String tmp = output.get(gram.getKey());
+                output.put(gram.getKey(), tmp + "\t" + gram.getValue().getProb().toString());
+                //    System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
+                //    writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
+                i += 1;
+            }
+        }
+
+        for(Map.Entry<String, String> str: output.entrySet()) {
+            System.out.println(str.getKey() + "\t" + str.getValue());
+            writer.println(str.getKey() + "\t" + str.getValue());
+        }
+
+
+        writer.close();
+
+
     }
 }
 
