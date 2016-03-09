@@ -150,6 +150,8 @@ public class CharacterModel {
         int englishCorrect = 0;
         int portugeseCorrect = 0;
 
+        int otherTotal = 0;
+        int otherCorrect = 0;
 
         HashMap<String, HashMap<String, Integer>> matrix = new HashMap<>();
         matrix.put("eu", new HashMap<String, Integer>() {{
@@ -159,6 +161,7 @@ public class CharacterModel {
             put("es", 0);
             put("en", 0);
             put("pt", 0);
+            put("ot", 0);
         }});
         matrix.put("ca", new HashMap<String, Integer>() {{
             put("eu", 0);
@@ -167,6 +170,7 @@ public class CharacterModel {
             put("es", 0);
             put("en", 0);
             put("pt", 0);
+            put("ot", 0);
         }});
         matrix.put("gl", new HashMap<String, Integer>() {{
             put("eu", 0);
@@ -175,6 +179,7 @@ public class CharacterModel {
             put("es", 0);
             put("en", 0);
             put("pt", 0);
+            put("ot", 0);
         }});
         matrix.put("es", new HashMap<String, Integer>() {{
             put("eu", 0);
@@ -183,6 +188,7 @@ public class CharacterModel {
             put("es", 0);
             put("en", 0);
             put("pt", 0);
+            put("ot", 0);
         }});
         matrix.put("en", new HashMap<String, Integer>() {{
             put("eu", 0);
@@ -191,6 +197,7 @@ public class CharacterModel {
             put("es", 0);
             put("en", 0);
             put("pt", 0);
+            put("ot", 0);
         }});
         matrix.put("pt", new HashMap<String, Integer>() {{
             put("eu", 0);
@@ -199,6 +206,16 @@ public class CharacterModel {
             put("es", 0);
             put("en", 0);
             put("pt", 0);
+            put("ot", 0);
+        }});
+        matrix.put("ot", new HashMap<String, Integer>() {{
+            put("eu", 0);
+            put("ca", 0);
+            put("gl", 0);
+            put("es", 0);
+            put("en", 0);
+            put("pt", 0);
+            put("ot", 0);
         }});
 
 
@@ -260,12 +277,27 @@ public class CharacterModel {
                     portugeseCorrect += 1;
                 }
             } else {
+                otherTotal += 1;
+                if(probLanguage == null) {
+                    otherCorrect += 1;
+                }
 
             }
 
-            if(probLanguage != null && language.length() == 2) {
+            if(probLanguage != null) {
                 HashMap<String, Integer> tmp = matrix.get(probLanguage);
-                tmp.put(language, tmp.get(language) + 1);
+                if(language.length() == 2) {
+                    tmp.put(language, tmp.get(language) + 1);
+                } else {
+                    tmp.put("ot", tmp.get("ot") + 1);
+                }
+            } else {
+                HashMap<String, Integer> tmp = matrix.get("ot");
+                if(language.length() == 2) {
+                    tmp.put(language, tmp.get(language) + 1);
+                } else {
+                    tmp.put("ot", tmp.get("ot") + 1);
+                }
             }
 
 
@@ -293,6 +325,7 @@ public class CharacterModel {
         path = this.base + "analysis-" + size + "gram.txt";
         writer = new PrintWriter(path, "UTF-8");
         writer.println("Overall Accuracy: " + correctD / totalD * 100 + "%");
+
         writer.println("Basque Accuracy: " + new Double(basqueCorrect) / new Double(basqueTotal) * new Double(100) + "%");
         writer.println("Catalan Accuracy: " + new Double(catalanCorrect) / new Double(catalanTotal) * new Double(100) + "%");
         writer.println("Glacian Accuracy: " + new Double(galacianCorrect) / new Double(galacianTotal) * new Double(100) + "%");
@@ -300,22 +333,25 @@ public class CharacterModel {
         writer.println("English Accuracy: " + new Double(englishCorrect) / new Double(englishTotal) * new Double(100) + "%");
         writer.println("Portugese Accuracy: " + new Double(portugeseCorrect) / new Double(portugeseTotal) * new Double(100) + "%");
         writer.println("Confusion Matrix");
-        writer.println("\t\tEU\tCA\tGL\tES\tEN\tPT");
+        writer.println("\t\tEU\t\tCA\t\tGL\t\tES\t\tEN\t\tPT");
         HashMap<String, Integer> mEU =  matrix.get("eu");
-        writer.println("EU\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        writer.println("EU\t\t"+mEU.get("eu")+"\t\t"+mEU.get("ca")+"\t\t"+mEU.get("gl")+"\t\t"+mEU.get("es") +"\t\t"+mEU.get("en")+"\t\t"+mEU.get("pt")+"\t\t"+mEU.get("ot"));
         mEU =  matrix.get("ca");
-        writer.println("CA\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        writer.println("CA\t\t"+mEU.get("eu")+"\t\t"+mEU.get("ca")+"\t\t"+mEU.get("gl")+"\t\t"+mEU.get("es") +"\t\t"+mEU.get("en")+"\t\t"+mEU.get("pt")+"\t\t"+mEU.get("ot"));
         mEU =  matrix.get("gl");
-        writer.println("GL\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        writer.println("GL\t\t"+mEU.get("eu")+"\t\t"+mEU.get("ca")+"\t\t"+mEU.get("gl")+"\t\t"+mEU.get("es") +"\t\t"+mEU.get("en")+"\t\t"+mEU.get("pt")+"\t\t"+mEU.get("ot"));
         mEU =  matrix.get("es");
-        writer.println("ES\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        writer.println("ES\t\t"+mEU.get("eu")+"\t\t"+mEU.get("ca")+"\t\t"+mEU.get("gl")+"\t\t"+mEU.get("es") +"\t\t"+mEU.get("en")+"\t\t"+mEU.get("pt")+"\t\t"+mEU.get("ot"));
         mEU =  matrix.get("en");
-        writer.println("EN\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        writer.println("EN\t\t"+mEU.get("eu")+"\t\t"+mEU.get("ca")+"\t\t"+mEU.get("gl")+"\t\t"+mEU.get("es") +"\t\t"+mEU.get("en")+"\t\t"+mEU.get("pt")+"\t\t"+mEU.get("ot"));
         mEU =  matrix.get("pt");
-        writer.println("PT\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        writer.println("PT\t\t"+mEU.get("eu")+"\t\t"+mEU.get("ca")+"\t\t"+mEU.get("gl")+"\t\t"+mEU.get("es") +"\t\t"+mEU.get("en")+"\t\t"+mEU.get("pt")+"\t\t"+mEU.get("ot"));
+        mEU =  matrix.get("ot");
+        writer.println("OT\t\t"+mEU.get("eu")+"\t\t"+mEU.get("ca")+"\t\t"+mEU.get("gl")+"\t\t"+mEU.get("es") +"\t\t"+mEU.get("en")+"\t\t"+mEU.get("pt")+"\t\t"+mEU.get("ot"));
 
 
         writer.close();
+
 
 
 
