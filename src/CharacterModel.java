@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,12 +14,17 @@ public class CharacterModel {
     private LanguageModel PortugeseLM;
     private File trainingFile;
     private File testingFile;
+    private String base;
+    private String lmBase;
     private double delta;
 
-    public CharacterModel(File trainingFile, File testingFile, int size, Double delta) {
+    public CharacterModel(File trainingFile, File testingFile, int size, Double delta) throws Exception {
         this.size = size;
         this.trainingFile = trainingFile;
         this.testingFile = testingFile;
+        String p = trainingFile.getAbsolutePath();
+        this.base = p.substring(0, p.lastIndexOf(File.separator) + 1);
+        this.lmBase = this.base + "LMs" + File.separator;
         this.delta = delta;
         BasqueLM = new LanguageModel(size, "Basque", "eu");
         CatalanLM = new LanguageModel(size, "Catalan", "ca");
@@ -75,9 +81,7 @@ public class CharacterModel {
         EnglishLM.refreshProbabilities(delta);
         PortugeseLM.refreshProbabilities(delta);
 
-        save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\", BasqueLM);
-        save("C:\\Users\\b0467851\\WORK\\school\\Simplified-TweetLID-corpus\\Simplified-TweetLID-corpus\\", EnglishLM);
-
+        save( BasqueLM);save(CatalanLM);save(GalicianLM);save(SpanishLM);save(EnglishLM);save(PortugeseLM);
     }
 
 
@@ -130,6 +134,75 @@ public class CharacterModel {
         int tried   = 0;
         int total   = 0;
         int correct = 0;
+        HashMap<String, String> results = new HashMap<>();
+
+        int basqueTotal = 0;
+        int catalanTotal = 0;
+        int galacianTotal = 0;
+        int spanishTotal = 0;
+        int englishTotal = 0;
+        int portugeseTotal = 0;
+
+        int basqueCorrect = 0;
+        int catalanCorrect = 0;
+        int galacianCorrect = 0;
+        int spanishCorrect = 0;
+        int englishCorrect = 0;
+        int portugeseCorrect = 0;
+
+
+        HashMap<String, HashMap<String, Integer>> matrix = new HashMap<>();
+        matrix.put("eu", new HashMap<String, Integer>() {{
+            put("eu", 0);
+            put("ca", 0);
+            put("gl", 0);
+            put("es", 0);
+            put("en", 0);
+            put("pt", 0);
+        }});
+        matrix.put("ca", new HashMap<String, Integer>() {{
+            put("eu", 0);
+            put("ca", 0);
+            put("gl", 0);
+            put("es", 0);
+            put("en", 0);
+            put("pt", 0);
+        }});
+        matrix.put("gl", new HashMap<String, Integer>() {{
+            put("eu", 0);
+            put("ca", 0);
+            put("gl", 0);
+            put("es", 0);
+            put("en", 0);
+            put("pt", 0);
+        }});
+        matrix.put("es", new HashMap<String, Integer>() {{
+            put("eu", 0);
+            put("ca", 0);
+            put("gl", 0);
+            put("es", 0);
+            put("en", 0);
+            put("pt", 0);
+        }});
+        matrix.put("en", new HashMap<String, Integer>() {{
+            put("eu", 0);
+            put("ca", 0);
+            put("gl", 0);
+            put("es", 0);
+            put("en", 0);
+            put("pt", 0);
+        }});
+        matrix.put("pt", new HashMap<String, Integer>() {{
+            put("eu", 0);
+            put("ca", 0);
+            put("gl", 0);
+            put("es", 0);
+            put("en", 0);
+            put("pt", 0);
+        }});
+
+
+
         while ((strLine = br.readLine()) != null) {
             // Print the content on the console
             String[] tabs = strLine.split("\t");
@@ -153,6 +226,49 @@ public class CharacterModel {
                     correct += 1;
                 }
             }
+
+
+            results.put(tabs[0], probLanguage);
+            if(language.equals("eu")) {
+                basqueTotal += 1;
+                if(probLanguage.equals(language)) {
+                    basqueCorrect += 1;
+                }
+            } else if(language.equals("ca")){
+                catalanTotal += 1;
+                if(probLanguage.equals(language)) {
+                    catalanCorrect += 1;
+                }
+            } else if(language.equals("gl")){
+                galacianTotal += 1;
+                if(probLanguage.equals(language)) {
+                    galacianCorrect += 1;
+                }
+            } else if(language.equals("es")){
+                spanishTotal += 1;
+                if(probLanguage.equals(language)) {
+                    spanishCorrect += 1;
+                }
+            } else if(language.equals("en")){
+                englishTotal += 1;
+                if(probLanguage.equals(language)) {
+                    englishCorrect += 1;
+                }
+            } else if(language.equals("pt")){
+                portugeseTotal += 1;
+                if(probLanguage.equals(language)) {
+                    portugeseCorrect += 1;
+                }
+            } else {
+
+            }
+
+            if(probLanguage != null && language.length() == 2) {
+                HashMap<String, Integer> tmp = matrix.get(probLanguage);
+                tmp.put(language, tmp.get(language) + 1);
+            }
+
+
         }
         Double triedD = new Double(tried);
         Double totalD = new Double(total);
@@ -160,6 +276,49 @@ public class CharacterModel {
 
         System.out.printf("%s%f%s\n", "Recall: ", correctD / totalD * 100, "%");
         System.out.printf("%s%f%s\n", "Precision: ", correctD / triedD * 100, "%");
+
+
+
+
+
+
+        String path = this.base + "results-" + size + "gram.txt";
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+        for(Map.Entry<String, String> str : results.entrySet()){
+            writer.println(str.getKey() + "\t" + str.getValue());
+        }
+        writer.close();
+
+
+        path = this.base + "analysis-" + size + "gram.txt";
+        writer = new PrintWriter(path, "UTF-8");
+        writer.println("Overall Accuracy: " + correctD / totalD * 100 + "%");
+        writer.println("Basque Accuracy: " + new Double(basqueCorrect) / new Double(basqueTotal) * new Double(100) + "%");
+        writer.println("Catalan Accuracy: " + new Double(catalanCorrect) / new Double(catalanTotal) * new Double(100) + "%");
+        writer.println("Glacian Accuracy: " + new Double(galacianCorrect) / new Double(galacianTotal) * new Double(100) + "%");
+        writer.println("Spanish Accuracy: " + new Double(spanishCorrect) / new Double(spanishTotal) * new Double(100) + "%");
+        writer.println("English Accuracy: " + new Double(englishCorrect) / new Double(englishTotal) * new Double(100) + "%");
+        writer.println("Portugese Accuracy: " + new Double(portugeseCorrect) / new Double(portugeseTotal) * new Double(100) + "%");
+        writer.println("Confusion Matrix");
+        writer.println("\t\tEU\tCA\tGL\tES\tEN\tPT");
+        HashMap<String, Integer> mEU =  matrix.get("eu");
+        writer.println("EU\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        mEU =  matrix.get("ca");
+        writer.println("CA\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        mEU =  matrix.get("gl");
+        writer.println("GL\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        mEU =  matrix.get("es");
+        writer.println("ES\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        mEU =  matrix.get("en");
+        writer.println("EN\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+        mEU =  matrix.get("pt");
+        writer.println("PT\t\t"+mEU.get("eu")+"\t"+mEU.get("ca")+"\t"+mEU.get("gl")+"\t"+mEU.get("es") +"\t"+mEU.get("en")+"\t"+mEU.get("pt"));
+
+
+        writer.close();
+
+
+
 
 
     }
@@ -215,9 +374,11 @@ public class CharacterModel {
         return total;
     }
 
-    public void save(String s, LanguageModel lm) throws Exception {
+    public void save(LanguageModel lm) throws Exception {
 
-        String path = s + lm.getName() + "-" + size + "gramLM.txt";
+
+        new File(this.lmBase).mkdir();
+        String path = this.lmBase + lm.getName() + "-" + size + "gramLM.txt";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
         int i = 0;
         lm.refreshProbabilities(0);
@@ -226,8 +387,6 @@ public class CharacterModel {
             HashMap<String, TE> grams = lm.getAt(key);
             for(Map.Entry<String, TE> gram: grams.entrySet()){
                 output.put(gram.getKey(), gram.getValue().getProb().toString());
-            //    System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
-            //    writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
                 i += 1;
             }
         }
@@ -237,14 +396,14 @@ public class CharacterModel {
             for(Map.Entry<String, TE> gram: grams.entrySet()) {
                 String tmp = output.get(gram.getKey());
                 output.put(gram.getKey(), tmp + "\t" + gram.getValue().getProb().toString());
-                //    System.out.println(gram.getKey() + "\t" + gram.getValue().getProb());
-                //    writer.println(gram.getKey() + "\t" + gram.getValue().getProb());
                 i += 1;
             }
         }
 
+        int l = 0;
         for(Map.Entry<String, String> str: output.entrySet()) {
-            System.out.println(str.getKey() + "\t" + str.getValue());
+            if( l >= 50 ) break;
+            l += 1;
             writer.println(str.getKey() + "\t" + str.getValue());
         }
 
