@@ -91,15 +91,17 @@ public class ConfusionMatrix {
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
         // Save the accuracies first
-        saveAccuracies(lms, writer);
+        HashMap<String, Integer> total = saveAccuracies(lms, writer);
 
         // Now save the confusion matrix
 
+        writer.println();
+        writer.println("Confusion Matrix Counts (P - Predicted, A - Actual)");
         // Save header first
-        writer.print("\t\t");
+        writer.printf("%-15s", " ");
         for(HashMap<String, Integer> map: matrix.values()) {
             for(String predictLangauge: map.keySet()) {
-                writer.print(predictLangauge + "\t\t");
+                writer.printf("%-15s", "P: " + predictLangauge);
             }
             break;
         }
@@ -110,10 +112,40 @@ public class ConfusionMatrix {
         for(Map.Entry<String, HashMap<String, Integer>> map : matrix.entrySet() ) {
             String actualLanguage = map.getKey();
             HashMap<String, Integer> subMatrix = map.getValue();
-            writer.print(actualLanguage + "\t\t");
+            writer.printf("%-15s", "A: " +actualLanguage);
             for(Map.Entry<String, Integer> subMap: subMatrix.entrySet()) {
                 Integer amountGuessed = subMap.getValue();
-                writer.print(amountGuessed + "\t\t");
+              //  writer.print(amountGuessed + "\t\t\t");
+                writer.printf("%-15s", amountGuessed.toString());
+            }
+            writer.println();
+        }
+
+
+
+        writer.println();
+        writer.println("Confusion Matrix Percents (P - Predicted, A - Actual)");
+        // Save header first
+        writer.printf("%-15s", " ");
+        for(HashMap<String, Integer> map: matrix.values()) {
+            for(String predictLangauge: map.keySet()) {
+                writer.printf("%-15s", "P: " + predictLangauge);
+            }
+            break;
+        }
+
+        writer.println();
+
+        // Now each entry
+        for(Map.Entry<String, HashMap<String, Integer>> map : matrix.entrySet() ) {
+            String actualLanguage = map.getKey();
+            HashMap<String, Integer> subMatrix = map.getValue();
+            writer.printf("%-15s", "A: " +actualLanguage);
+            for(Map.Entry<String, Integer> subMap: subMatrix.entrySet()) {
+                Integer amountGuessed = subMap.getValue();
+                Probability percentGuessed = new Probability(
+                        (new Double(amountGuessed) / new Double(total.get(actualLanguage))*100));
+                writer.printf("%-15s", percentGuessed.toString());
             }
             writer.println();
         }
@@ -125,8 +157,9 @@ public class ConfusionMatrix {
      *
      * @param lms Map of language -> Langauge Model
      * @param writer Printwriter object used to print the results
+     * @return Map Language -> total tweets
      */
-    private void saveAccuracies(HashMap<String, LanguageModel> lms, PrintWriter writer ) {
+    private HashMap<String, Integer>  saveAccuracies(HashMap<String, LanguageModel> lms, PrintWriter writer ) {
         // We need to count total and correct
         HashMap<String, Integer> totalCount = new HashMap<>();
         HashMap<String, Integer> correctCount = new HashMap<>();
@@ -144,10 +177,12 @@ public class ConfusionMatrix {
             }
         }
 
+        writer.println("Per Language Accuracy:");
         for(String language: lms.keySet()) {
             writer.println(language + " Accuracy: " +
-                    new Double(correctCount.get(language)) / new Double(totalCount.get(language)) *100 + "%" );
+                    new Probability(new Double(correctCount.get(language))/new Double(totalCount.get(language)) *100));
         }
+        writer.println();
 
         // Now we do it for total accuracy
         Integer totalCorrect = 0;
@@ -158,6 +193,8 @@ public class ConfusionMatrix {
         for(Integer i: totalCount.values()) {
             totalTotal += i;
         }
+        int preOtherTotal = totalTotal;
+        int preOtherCorrect = totalCorrect;
         // Add in the ones we didn't find
         for(HashMap<String, Integer> map: matrix.values()) {
             totalTotal += map.get("ot");
@@ -165,7 +202,13 @@ public class ConfusionMatrix {
         totalCorrect += matrix.get("ot").get("ot");
 
 
-        writer.println("Overall Accuracy: " + new Double(totalCorrect) / new Double(totalTotal) * 100 + "%");
+        writer.println("Overall Accuracy (with 'other'): " + new Probability(new Double(totalCorrect)/new Double(totalTotal)*100));
+        writer.println("Overall Accuracy (without 'other'): " + new Probability(new Double(preOtherCorrect)/new Double(preOtherTotal)*100));
+
+
+        // Add other to total count
+        totalCount.put("ot", totalTotal - preOtherTotal);
+        return totalCount;
     }
 
 }

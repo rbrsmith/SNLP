@@ -62,7 +62,6 @@ public class Main {
             System.err.println("Error in reading / writting files. " + ioe.getMessage());
         } catch(InconsistentNgramSizeException nge) {
             System.err.println("Error in NGram sizes. " + nge.getMessage());
-
         }
     }
 }

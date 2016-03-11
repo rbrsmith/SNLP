@@ -34,6 +34,14 @@ public class Probability implements Comparable {
     }
 
     /**
+     *
+     * @return double prob in scientific notation
+     */
+    public double getRaw() {
+        return prob;
+    }
+
+    /**
      * Multiply two probabilities
      * @param one LanguageModel.Probability
      * @param two LanguageModel.Probability

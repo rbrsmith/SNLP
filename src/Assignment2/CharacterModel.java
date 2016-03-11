@@ -1,8 +1,9 @@
 package Assignment2;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+
 import LanguageModel.*;
 
 /**
@@ -155,7 +156,7 @@ public class CharacterModel {
         // We have two results
         // A confusion matrix - saved in analysis.txt
         // A results data - saved in reulsts.txt
-        HashMap<String, String> results = new HashMap<>();
+        ArrayList<Result> results = new ArrayList<>();
         ConfusionMatrix matrix = new ConfusionMatrix(lms);
 
 
@@ -185,10 +186,14 @@ public class CharacterModel {
 
             // Get the langauge and probable language as defined by our language models
             String language = tabs[2];
-            String probLanguage = getLanguage(text);
+            Result result = getLanguage(text);
+            result.setTweetNumber(tabs[0]);
+            result.setActualLanguage(language);
+            String probLanguage = result.getProbLanguage();
+
 
             // Add to results.txt
-            results.put(tabs[0], probLanguage);
+            results.add(result);
             // Add to analysis.txt
             matrix.add(probLanguage, language);
         }
@@ -208,23 +213,26 @@ public class CharacterModel {
      * @param results Map of tweet number -> most probable language
      * @throws Exception
      */
-    private void saveResults(HashMap<String, String> results) throws FileNotFoundException, UnsupportedEncodingException {
+    private void saveResults(ArrayList<Result> results) throws FileNotFoundException, UnsupportedEncodingException {
         // Results txt
         String path = this.base + "results-" + size + "gram.txt";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
-        for(Map.Entry<String, String> str : results.entrySet()){
-            writer.println(str.getKey() + "\t" + str.getValue());
+        writer.println("Tweet Number\tProb Language\tCertainty\tActual Language");
+        for(Result res: results) {
+            writer.println(res);
         }
+
         writer.close();
     }
 
     /**
      * Get the most probable language based on our language models
      * @param text String text to be analysed
+     * @param certain Proabibility to be filled in with how certain we are of the chosen language
      * @return String reprenting the language
      * @throws Exception
      */
-    private String getLanguage(String text) throws InconsistentNgramSizeException {
+    private Result getLanguage(String text) throws InconsistentNgramSizeException {
         // Set up default winner with 0 probability and null
         Probability winner = new Probability(0);
         LanguageModel winLM = null;
@@ -233,15 +241,16 @@ public class CharacterModel {
         // If greater than current winner, set current winner to that model
         for(LanguageModel lm: lms.values()) {
             prob = getProbability(text, lm);
+            if(prob == null) continue;
             if(prob.compareTo(winner) > 0) {
                 winner = prob;
                 winLM = lm;
             }
         }
         if(winLM != null) {
-            return winLM.getLang();
+            return new Result(winLM.getLang(), winner);
         } else {
-            return null;
+            return new Result(null, winner);
         }
     }
 
