@@ -1,6 +1,8 @@
 package Assignment2;
 
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import LanguageModel.*;
@@ -82,7 +84,7 @@ public class ConfusionMatrix {
      * @param lms Map containing language -> language model
      * @throws Exception
      */
-    public void save(String dir, int size, HashMap<String, LanguageModel> lms) throws Exception {
+    public void save(String dir, int size, HashMap<String, LanguageModel> lms) throws FileNotFoundException, UnsupportedEncodingException {
 
         // Set up the file
         String path = dir + "analysis-" + size + "gram.txt";

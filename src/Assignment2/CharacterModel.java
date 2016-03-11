@@ -26,7 +26,7 @@ public class CharacterModel {
      * @param delta
      * @throws Exception
      */
-    public CharacterModel(File trainingFile, File testingFile, int size, Double delta) throws Exception {
+    public CharacterModel(File trainingFile, File testingFile, int size, Double delta) {
         this.size = size;
         this.trainingFile = trainingFile;
         this.testingFile = testingFile;
@@ -50,7 +50,7 @@ public class CharacterModel {
      * Train the data on the training file
      * @throws Exception
      */
-    public void train() throws Exception {
+    public void train() throws IOException, InconsistentNgramSizeException {
 
         // Get file
         FileInputStream fstream = new FileInputStream(trainingFile);
@@ -106,7 +106,7 @@ public class CharacterModel {
      * @param line String containing the tweet text
      * @throws Exception
      */
-    private void addToLM(LanguageModel lm, String line) throws Exception {
+    private void addToLM(LanguageModel lm, String line) throws InconsistentNgramSizeException {
         NGram tmp;
         // 'i' will hold the character code point - NOT the character
         for(int i = 0; i<line.length();) {
@@ -145,7 +145,7 @@ public class CharacterModel {
      * Test the data using the testing tweets
      * @throws Exception
      */
-    public void test()  throws Exception {
+    public void test() throws IOException, InconsistentNgramSizeException {
 
         // Set up the file
         FileInputStream fstream = new FileInputStream(testingFile);
@@ -193,10 +193,10 @@ public class CharacterModel {
             matrix.add(probLanguage, language);
         }
 
-        // Save results file
+        // Save results.txt file
         saveResults(results);
 
-        // Save text file
+        // Save analysis.txt file
         matrix.save(this.base, size, lms);
 
         br.close();
@@ -208,7 +208,7 @@ public class CharacterModel {
      * @param results Map of tweet number -> most probable language
      * @throws Exception
      */
-    private void saveResults(HashMap<String, String> results) throws Exception {
+    private void saveResults(HashMap<String, String> results) throws FileNotFoundException, UnsupportedEncodingException {
         // Results txt
         String path = this.base + "results-" + size + "gram.txt";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
@@ -224,7 +224,7 @@ public class CharacterModel {
      * @return String reprenting the language
      * @throws Exception
      */
-    private String getLanguage(String text) throws Exception {
+    private String getLanguage(String text) throws InconsistentNgramSizeException {
         // Set up default winner with 0 probability and null
         Probability winner = new Probability(0);
         LanguageModel winLM = null;
@@ -253,7 +253,7 @@ public class CharacterModel {
      * @return Probability of the given text from this language model
      * @throws Exception
      */
-    private Probability getProbability(String text, LanguageModel lm) throws Exception {
+    private Probability getProbability(String text, LanguageModel lm) throws InconsistentNgramSizeException {
         NGram tmp;
         Probability total = null;
         for(int i = 0; i<text.length();) {

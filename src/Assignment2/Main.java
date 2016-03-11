@@ -1,5 +1,7 @@
 package Assignment2;
 
+import LanguageModel.InconsistentNgramSizeException;
+
 import java.io.*;
 
 
@@ -8,7 +10,7 @@ import java.io.*;
  */
 public class Main {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         // Validate input
 
         // Make sure we have the correct amount of values
@@ -17,7 +19,7 @@ public class Main {
             return;
         }
 
-        // Make sure ints are ints
+        // Make sure ints are ints and doubles are doubles
         try {
             Integer.parseInt(args[2]);
         } catch(Exception e) {
@@ -51,10 +53,16 @@ public class Main {
 
         // Initiate model
         CharacterModel model = new CharacterModel(training, testing, modelSize,  delta);
-        // Train and Test
-        model.train();
-        model.test();
+        try {
+            // Train and Test
+            model.train();
+            model.test();
+            System.out.println("O.K.");
+        } catch(IOException ioe) {
+            System.err.println("Error in reading / writting files. " + ioe.getMessage());
+        } catch(InconsistentNgramSizeException nge) {
+            System.err.println("Error in NGram sizes. " + nge.getMessage());
 
-        System.out.println("O.K.");
+        }
     }
 }

@@ -3,7 +3,9 @@ package LanguageModel;
 import Assignment2.Language;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -312,7 +314,7 @@ public class LanguageModel {
      * @param delta Delta to be applied
      * @throws Exception
      */
-    public void save(String dir, double delta) throws Exception {
+    public void save(String dir, double delta) throws FileNotFoundException, UnsupportedEncodingException {
 
         // Set up file
         new File(dir).mkdir();
