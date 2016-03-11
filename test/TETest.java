@@ -1,3 +1,5 @@
+import LanguageModel.Probability;
+import LanguageModel.TE;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
