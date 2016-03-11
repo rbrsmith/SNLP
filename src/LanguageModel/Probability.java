@@ -27,6 +27,12 @@ public class Probability implements Comparable {
         }
     }
 
+    public Probability(double prob, boolean ignore) {
+        if(ignore){
+            this.prob = prob;
+        }
+    }
+
     public String toString() {
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(nbDecimals);
@@ -50,6 +56,7 @@ public class Probability implements Comparable {
     static public Probability multiply(Probability one, Probability two) {
         return new Probability((one.prob)/100 * (two.prob/100) * 100);
     }
+
 
     @Override
     public boolean equals(Object obj) {

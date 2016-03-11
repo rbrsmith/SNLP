@@ -1,6 +1,7 @@
 package Assignment2;
 
 import LanguageModel.InconsistentNgramSizeException;
+import LanguageModel.Probability;
 
 import java.io.*;
 
@@ -56,8 +57,13 @@ public class Main {
         try {
             // Train and Test
             model.train();
-            model.test();
-            System.out.println("O.K.");
+            Probability overall = model.test();
+            if(overall == null) {
+                System.err.println("Error getting total probability");
+            } else {
+                System.out.println("Overal Accuracy:\t" + overall);
+                System.out.println("O.K.");
+            }
         } catch(IOException ioe) {
             System.err.println("Error in reading / writting files. " + ioe.getMessage());
         } catch(InconsistentNgramSizeException nge) {

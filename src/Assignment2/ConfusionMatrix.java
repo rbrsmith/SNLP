@@ -15,6 +15,7 @@ public class ConfusionMatrix {
 
 
     private HashMap<String, HashMap<String, Integer>> matrix = new HashMap<>();
+    private Probability overalAccuracy;
 
     /**
      * Constructor - Initiate matrix rows and columns
@@ -36,6 +37,7 @@ public class ConfusionMatrix {
         }
         languages.put("ot", 0);
         matrix.put("ot", languages);
+        overalAccuracy = null;
     }
 
     /**
@@ -201,14 +203,19 @@ public class ConfusionMatrix {
         }
         totalCorrect += matrix.get("ot").get("ot");
 
+        Probability totalOtherAccuracy = new Probability(new Double(totalCorrect)/new Double(totalTotal)*100);
+        Probability totalAccuracy = new Probability(new Double(preOtherCorrect)/new Double(preOtherTotal)*100);
+        this.overalAccuracy = totalAccuracy;
 
-        writer.println("Overall Accuracy (with 'other'): " + new Probability(new Double(totalCorrect)/new Double(totalTotal)*100));
-        writer.println("Overall Accuracy (without 'other'): " + new Probability(new Double(preOtherCorrect)/new Double(preOtherTotal)*100));
-
+        writer.println("Overall Accuracy (with 'other'): " + totalOtherAccuracy);
+        writer.println("Overall Accuracy (without 'other'): " + totalAccuracy);
 
         // Add other to total count
         totalCount.put("ot", totalTotal - preOtherTotal);
         return totalCount;
     }
 
+    public Probability getOveralAccuracy() {
+        return overalAccuracy;
+    }
 }

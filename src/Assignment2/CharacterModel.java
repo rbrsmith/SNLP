@@ -144,9 +144,10 @@ public class CharacterModel {
 
     /**
      * Test the data using the testing tweets
+     * @return Probability of the overal performance of the assignment
      * @throws Exception
      */
-    public void test() throws IOException, InconsistentNgramSizeException {
+    public Probability test() throws IOException, InconsistentNgramSizeException {
 
         // Set up the file
         FileInputStream fstream = new FileInputStream(testingFile);
@@ -203,9 +204,11 @@ public class CharacterModel {
 
         // Save analysis.txt file
         matrix.save(this.base, size, lms);
-
+        Probability overalAccuracy = matrix.getOveralAccuracy();
         br.close();
         fstream.close();
+
+        return overalAccuracy;
     }
 
     /**
@@ -253,6 +256,9 @@ public class CharacterModel {
             return new Result(null, winner);
         }
     }
+
+
+
 
     /**
      *
