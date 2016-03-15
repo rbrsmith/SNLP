@@ -169,9 +169,10 @@ public class ConfusionMatrix {
             totalCount.put(language, 0);
             correctCount.put(language, 0);
         }
+        correctCount.put("ot", 0);
 
         // We can use the matrix to get these values for each language
-        for(String language: lms.keySet()) {
+        for(String language: matrix.keySet()) {
             HashMap<String, Integer> submatrix = matrix.get(language);
             for(String l : lms.keySet()) {
                 correctCount.put(language, submatrix.get(language));

@@ -61,8 +61,10 @@ public class Main {
             if(overall == null) {
                 System.err.println("Error getting total probability");
             } else {
-                System.out.println("Overal Accuracy:\t" + overall);
+                System.out.println("Overall Accuracy:\t" + overall);
                 System.out.println("O.K.");
+
+
             }
         } catch(IOException ioe) {
             System.err.println("Error in reading / writting files. " + ioe.getMessage());
