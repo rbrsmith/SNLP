@@ -343,7 +343,7 @@ public class LanguageModel {
 
         // Now do the output
         int l = 0;
-        writer.println(size + " Gram\tUnSmooted\tSmoothed");
+        writer.println(size + " Gram\tUnsmoothed\tSmoothed");
         for(Map.Entry<String, String> str: output.entrySet()) {
             if( l >= 50 ) break;
             l += 1;
